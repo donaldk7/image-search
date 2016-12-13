@@ -13,17 +13,18 @@ var router = express.Router()
 
 var searchTerm = ''
 var offset = 5
-var output = 
+var db = 
 [{"when":"2016-12-13T00:38:14.832Z","term":"it's a wonderful life"},
 {"when":"2016-12-13T00:37:43.238Z","term":"playstation4"},
 {"when":"2016-12-13T00:37:10.938Z","term":"black friday"},
-{"when":"2016-12-13T00:35:17.882Z","term":"tesla"},
+{"when":"2016-12-13T00:35:17.882Z","term":"mercedes benz"},
 {"when":"2016-12-13T00:35:07.530Z","term":"tesla"},
-{"when":"2016-12-13T00:34:39.560Z","term":"christmas"},
+{"when":"2016-12-13T00:34:39.560Z","term":"christmas carol"},
 {"when":"2016-12-13T00:34:25.926Z","term":"christmas"},
 {"when":"2016-12-12T21:14:24.113Z","term":"snow traffic"},
-{"when":"2016-12-12T21:09:03.849Z","term":"snow traffic"}]
+{"when":"2016-12-12T21:09:03.849Z","term":"snow"}]
 
+var output = []
 
 router.use(function(req, res, next) {
     // do logging
@@ -38,11 +39,14 @@ router.route('/image/:searchTerm')
         var reqUrl = url.parse(req.url, true)
         var query = reqUrl.query    // json {'offset':10} for example
         offset = query['offset']
+        var datetime = new Date()
+        
+        db.unshift({"when":datetime,"term":searchTerm})
         
         if (offset < 0) {
             offset = 1
-        } else if (offset > 50) {
-            offset = 50
+        } else if (offset > 10) {
+            offset = 10
         }
         
         function dispImages() {
@@ -56,11 +60,12 @@ router.route('/image/:searchTerm')
 
 router.route('/latest')
     .get(function(req, res){
-        var options = {
-            "limit": 10,
-            "sort": {'when': -1}
+        var disp = []   // display past search history
+        var len = Math.min(db.length, 10)
+        for (var i = 0; i < len; i++) {
+            disp.push(db[i])
         }
-        
+        res.send(disp)
 
     })
 
